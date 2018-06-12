@@ -42,7 +42,6 @@ export class ReviewManager implements vscode.DecorationProvider {
 	private _pr: PullRequestModel;
 
 	private constructor(
-		private _context: vscode.ExtensionContext,
 		private _repository: Repository
 	) {
 		this._documentCommentProvider = null;
@@ -65,10 +64,12 @@ export class ReviewManager implements vscode.DecorationProvider {
 	}
 
 	static initialize(
-		_context: vscode.ExtensionContext,
 		_repository: Repository
 	) {
-		ReviewManager._instance = new ReviewManager(_context, _repository);
+		if (ReviewManager._instance) {
+			ReviewManager._instance.dispose();
+		}
+		ReviewManager._instance = new ReviewManager(_repository);
 	}
 
 	static get instance() {
@@ -76,7 +77,7 @@ export class ReviewManager implements vscode.DecorationProvider {
 	}
 	get prFileChangesProvider() {
 		if (!this._prFileChangesProvider) {
-			this._prFileChangesProvider = new FileChangesProvider(this._context);
+			this._prFileChangesProvider = new FileChangesProvider();
 			this._disposables.push(this._prFileChangesProvider);
 		}
 

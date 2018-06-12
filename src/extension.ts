@@ -14,11 +14,13 @@ import { CredentialStore } from './credentials';
 import { registerCommands } from './commands';
 import Logger from './logger';
 
+
+let repositories: { [key: string]: Repository } = {};
+
+
 export async function activate(context: vscode.ExtensionContext) {
 	// initialize resources
 	Resource.initialize(context);
-
-	const rootPath = vscode.workspace.rootPath;
 
 	const config = vscode.workspace.getConfiguration('github');
 	const configuration = new Configuration(
@@ -37,19 +39,38 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	Logger.appendLine('Looking for git repository');
-	const repository = new Repository(rootPath);
-	let repositoryInitialized = false;
-	repository.onDidRunGitStatus(async e => {
-		if (repositoryInitialized) {
-			return;
-		}
-		Logger.appendLine('Git repository found, initializing review manager and pr tree view.')
-		repositoryInitialized = true;
-		let credentialStore = new CredentialStore(configuration);
-		await repository.connectGitHub(credentialStore);
-		ReviewManager.initialize(context, repository);
-		PRProvider.initialize(context, configuration, repository);
-		registerCommands(context);
+	let credentialStore = new CredentialStore(configuration);
+	registerCommands(context); // only register core commands once.
+
+	if (vscode.scm.activeSourceControl) {
+		load(context, configuration, vscode.scm.activeSourceControl, credentialStore);
+	}
+
+	vscode.scm.onDidChangeActiveSourceControl(e => {
+		load(context, configuration, e, credentialStore);
 	});
+}
+
+async function load(context: vscode.ExtensionContext, configuration: Configuration, activeSourceControl: vscode.SourceControl, credentialStore: CredentialStore) {
+	let rootUri = activeSourceControl.rootUri;
+	let workspaceFolder = vscode.workspace.getWorkspaceFolder(rootUri);
+	Logger.appendLine(`Loading repository in ${workspaceFolder}`);
+
+	let repository = repositories[workspaceFolder.uri.toString()];
+	if (!repository) {
+		repository = new Repository(workspaceFolder.uri.fsPath);
+		let promise = new Promise<void>((resolve, reject) => {
+			let dispose = repository.onDidRunGitStatus(e => {
+				dispose.dispose();
+				resolve();
+			});
+		});
+
+		await promise;
+		await repository.connectGitHub(credentialStore);
+		repositories[workspaceFolder.uri.toString()] = repository;
+	}
+
+	ReviewManager.initialize(repository);
+	PRProvider.initialize(configuration, repository);
 }

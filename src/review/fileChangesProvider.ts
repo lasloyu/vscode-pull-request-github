@@ -15,9 +15,12 @@ export class FileChangesProvider extends vscode.Disposable implements vscode.Tre
 
 	private _localFileChanges: PRFileChangeNode[] = [];
 	private _pullrequest: PullRequestModel = null;
-	constructor(private context: vscode.ExtensionContext) {
+	private _disposables: vscode.Disposable[];
+
+	constructor() {
 		super(() => this.dispose());
-		this.context.subscriptions.push(vscode.window.registerTreeDataProvider<PRFileChangeNode | PRDescriptionNode>('prStatus', this));
+		this._disposables = [];
+		this._disposables.push(vscode.window.registerTreeDataProvider<PRFileChangeNode | PRDescriptionNode>('prStatus', this));
 	}
 
 	async showPullRequestFileChanges(pullrequest: PullRequestModel, fileChanges: PRFileChangeNode[]) {
@@ -62,5 +65,11 @@ export class FileChangesProvider extends vscode.Disposable implements vscode.Tre
 		} else {
 			return [];
 		}
+	}
+
+	dispose() {
+		this._disposables.forEach(dispose => {
+			dispose.dispose();
+		});
 	}
 }

@@ -5,7 +5,7 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"name": "Launch Extension",
-			"runtimeExecutable": "${execPath}",
+			"runtimeExecutable": "/Users/penlv/code/vscode/scripts/code.bat",
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],

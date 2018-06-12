@@ -18,27 +18,31 @@ export class PRProvider implements vscode.TreeDataProvider<TreeNode>, vscode.Tex
 	private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
 	get onDidChange(): vscode.Event<vscode.Uri> { return this._onDidChange.event; }
 
+	private _disposables: vscode.Disposable[];
+
 	private constructor(
-		private context: vscode.ExtensionContext,
 		private configuration: Configuration,
 		private repository: Repository
 	) {
-		context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('pr', this));
-		context.subscriptions.push(vscode.window.registerDecorationProvider(this));
-		context.subscriptions.push(vscode.commands.registerCommand('pr.refreshList', _ => {
+		this._disposables = [];
+		this._disposables.push(vscode.workspace.registerTextDocumentContentProvider('pr', this));
+		this._disposables.push(vscode.window.registerDecorationProvider(this));
+		this._disposables.push(vscode.commands.registerCommand('pr.refreshList', _ => {
 			this._onDidChangeTreeData.fire();
 		}));
-		this.context.subscriptions.push(vscode.window.registerTreeDataProvider<TreeNode>('pr', this));
-		this.context.subscriptions.push(this.configuration.onDidChange(e => {
+		this._disposables.push(vscode.window.registerTreeDataProvider<TreeNode>('pr', this));
+		this._disposables.push(this.configuration.onDidChange(e => {
 			this._onDidChangeTreeData.fire();
 		}));
 	}
 
 	static initialize(
-		context: vscode.ExtensionContext,
 		configuration: Configuration,
 		repository: Repository) {
-		PRProvider._instance = new PRProvider(context, configuration, repository);
+		if (PRProvider._instance) {
+			PRProvider._instance.dispose();
+		}
+		PRProvider._instance = new PRProvider(configuration, repository);
 	}
 
 	static get instance() {
@@ -90,4 +94,9 @@ export class PRProvider implements vscode.TreeDataProvider<TreeNode>, vscode.Tex
 		}
 	}
 
+	dispose() {
+		this._disposables.forEach(dispose => {
+			dispose.dispose();
+		});
+	}
 }
