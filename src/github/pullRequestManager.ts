@@ -14,7 +14,7 @@ import { IPullRequestManager, IPullRequestModel, IPullRequestsPagingOptions, PRT
 import { PullRequestGitHelper } from "./pullRequestGitHelper";
 import { PullRequestModel } from "./pullRequestModel";
 import { parserCommentDiffHunk } from "../common/diffHunk";
-import { Configuration } from "../configuration";
+import { Configuration } from '../authentication/configuration';
 
 interface PageInformation {
 	pullRequestPage: number;
