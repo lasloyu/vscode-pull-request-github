@@ -6,7 +6,7 @@ import * as uuid from 'uuid/v4';
 import * as express from 'express';
 import * as http from 'http';
 import * as https from 'https';
-import { Request, Response } from '../../node_modules/@types/express-serve-static-core';
+import { Request, Response } from 'express-serve-static-core';
 
 const OAUTH_STEP1 = '/login/oauth/authorize';
 const OAUTH_STEP2 = '/login/oauth/access_token';

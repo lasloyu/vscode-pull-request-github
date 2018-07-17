@@ -82,7 +82,7 @@ export class VSCodeConfiguration extends Configuration {
 			token: this.token
 		});
 		const config = vscode.workspace.getConfiguration(SETTINGS_NAMESPACE);
-		config.update(HOSTS_KEY, this.hosts as [], true);
+		config.update(HOSTS_KEY, this.hosts, true);
 	}
 
 	private setHost(host: IHostConfiguration) {

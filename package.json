@@ -201,12 +201,14 @@
     "gulp-util": "^3.0.8"
   },
   "dependencies": {
-    "iconv-lite": "0.4.23",
-    "vscode": "^1.1.18",
     "@octokit/rest": "^15.8.0",
-    "markdown-it": "^8.4.0",
+    "@types/express-serve-static-core": "^4.16.0",
+    "express": "^4.16.3",
     "git-credential-node": "^1.1.0",
+    "iconv-lite": "0.4.23",
+    "markdown-it": "^8.4.0",
+    "moment": "^2.22.1",
     "tmp": "^0.0.31",
-    "moment": "^2.22.1"
+    "vscode": "^1.1.18"
   }
 }
